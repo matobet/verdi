@@ -21,8 +21,8 @@ func main() {
 		log.Fatal("Failed to initialize backend", err)
 	}
 
-	reply, err := cmd.Run("AddVM", map[string]interface{}{
-		"host": "7dacd585-309e-4a67-976b-ff06f8960377",
+	reply, err := cmd.Run("RemoveVM", map[string]interface{}{
+		"id": "bbe08913-c1ff-44a6-b0ba-423f23725135",
 	})
 
 	if err != nil {

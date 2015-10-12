@@ -1,6 +1,6 @@
 package model
 
-type Vm struct {
+type VM struct {
 	ID        GUID   `redis:"id"`
 	Name      string `redis:"name"`
 	Status    Status `redis:"status"`

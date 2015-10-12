@@ -45,9 +45,9 @@ var commands = byName(Commands{
 		handler: stopVM,
 	},
 	&Command{
-		Name:    "DeleteVM",
+		Name:    "RemoveVM",
 		Class:   Global,
-		handler: deleteVM,
+		handler: removeVM,
 	},
 	&Command{
 		Name:    "PingHost",

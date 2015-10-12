@@ -139,12 +139,12 @@ func Listen(queue string) {
 		}
 
 		cmd := commands[name]
-		log.Println("Processing command:", cmd.Name)
 		if cmd == nil {
 			respondError(id, "Unknown command")
 			continue
 		}
 
+		log.Println("Processing command:", cmd.Name)
 		result, err := cmd.handler(request.Params)
 		if err != nil {
 			respondError(id, err.Error())
