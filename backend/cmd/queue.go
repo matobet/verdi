@@ -15,10 +15,10 @@ func queueByClass(class Class, params map[string]interface{}) (queue string, err
 
 func queueByClassAndParams(class Class, params map[string]interface{}) (queue string, err error) {
 	className := classes[class]
-	if id, ok := params[className]; ok {
-		return QueueByClassAndID(class, id.(string)), nil
+	if id, ok := params[className+"_id"]; ok {
+		return QueueByClassAndID(class, id.(fmt.Stringer).String()), nil
 	}
-	return "", fmt.Errorf(`Commands of class "%s" require '%s' id as parameter`, className, className)
+	return "", fmt.Errorf(`Commands of class "%s" require '%s' as parameter`, className, className+"_id")
 }
 
 func QueueByClassAndID(class Class, id string) string {

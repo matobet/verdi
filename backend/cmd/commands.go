@@ -1,5 +1,7 @@
 package cmd
 
+import "github.com/matobet/verdi/env"
+
 type Class int8
 
 const (
@@ -18,7 +20,7 @@ var classes = [...]string{
 	"vm",
 }
 
-type handler func(params map[string]interface{}) (result interface{}, err error)
+type handler func(backend env.Backend, params map[string]interface{}) (result interface{}, err error)
 
 type Command struct {
 	Name    string

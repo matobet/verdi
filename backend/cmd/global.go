@@ -5,37 +5,37 @@ import (
 	"fmt"
 
 	"github.com/garyburd/redigo/redis"
-	"github.com/matobet/verdi/config"
+	"github.com/matobet/verdi/env"
 	"github.com/matobet/verdi/model"
 	maps "github.com/mitchellh/mapstructure"
 )
 
 type IDParams struct {
-	ID model.GUID `mapstructure:"id"`
+	ID model.GUID `mapstructure:"id" structs:"id"`
 }
 
 type AddVmParams struct {
-	Name      string     `mapstructure:"name"`
-	ClusterID model.GUID `mapstructure:"cluster_id"`
+	Name      string     `structs:"name" mapstructure:"name"`
+	ClusterID model.GUID `structs:"cluster_id" mapstructure:"cluster_id"`
 }
 
-func addVM(params map[string]interface{}) (result interface{}, err error) {
+func addVM(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
 	var p AddVmParams
 	if err = maps.Decode(params, &p); err != nil {
 		return
 	}
 
-	conn := redisPool.Get()
+	conn := backend.Redis()
 	defer conn.Close()
 
-	lock, err := redis.String(conn.Do("SET", "lock:vm:name:"+p.Name,
-		config.Conf.HostID, "EX", config.Conf.CommandTimeout, "NX"))
-
-	if err != nil || lock == "" {
+	nameLock := "lock:vm:name:" + p.Name
+	nameLocked, err := conn.Lock(nameLock)
+	if err != nil || !nameLocked {
 		return nil, fmt.Errorf("VM with name '%s' is already being created", p.Name)
 	}
+	defer conn.Unlock(nameLock)
 
-	existing, err := redis.String(conn.Do("GET", "query:VM:by:name:"+p.Name))
+	existing, err := conn.GetString("q:VM:name:" + p.Name)
 	if existing != "" {
 		return nil, fmt.Errorf("VM with name '%s' already exists", p.Name)
 	}
@@ -46,34 +46,31 @@ func addVM(params map[string]interface{}) (result interface{}, err error) {
 		ClusterID: p.ClusterID,
 	}
 
-	conn.Send("MULTI")
-	conn.Send("SADD", "VM", vm.ID)
-	conn.Send("HMSET", redis.Args{"VM:" + vm.ID}.AddFlat(vm)...)
-	conn.Send("SET", "query:VM:by:name:"+p.Name, vm.ID)
-	_, err = conn.Do("EXEC")
+	tx := conn.Tx().Begin()
+	tx.Put(vm)
+	err = tx.Commit()
 
 	return "Created", err
 }
 
-func runVM(params map[string]interface{}) (result interface{}, err error) {
+func runVM(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
 	return nil, errors.New("Not implemented")
 }
 
-func stopVM(params map[string]interface{}) (result interface{}, err error) {
+func stopVM(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
 	return nil, errors.New("Not implemented")
-
 }
 
-func removeVM(params map[string]interface{}) (result interface{}, err error) {
+func removeVM(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
 	var p IDParams
 	if err = maps.Decode(params, &p); err != nil {
 		return
 	}
 
-	conn := redisPool.Get()
+	conn := backend.Redis()
 	defer conn.Close()
 
-	name, err := redis.String(conn.Do("HGET", "VM:"+p.ID, "name"))
+	name, err := conn.HGetString("VM:"+p.ID.String(), "name")
 	if err == redis.ErrNil {
 		return nil, fmt.Errorf("VM with ID '%s' does not exist", p.ID)
 	}
@@ -81,10 +78,9 @@ func removeVM(params map[string]interface{}) (result interface{}, err error) {
 		return
 	}
 
-	conn.Send("MULTI")
-	conn.Send("SREM", "VM", p.ID)
-	conn.Send("DEL", "VM:"+p.ID, "query:VM:by:name:"+name)
-	_, err = conn.Do("EXEC")
+	tx := conn.Tx().Begin()
+	tx.Delete(&model.VM{ID: p.ID, Name: name})
+	err = tx.Commit()
 
 	return "Removed", err
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/matobet/verdi/config"
-	"github.com/matobet/verdi/util"
+	"github.com/matobet/verdi/env"
 	"github.com/satori/go.uuid"
 )
 
@@ -25,15 +25,7 @@ type Response struct {
 
 var TimedOut = errors.New("command.Run: Command timed out")
 
-var redisPool *redis.Pool
-
-func Init() error {
-	redisPool = util.NewRedisPool()
-
-	return nil
-}
-
-func Run(name string, params map[string]interface{}) (result map[string]interface{}, err error) {
+func Run(backend env.Backend, name string, params map[string]interface{}) (result map[string]interface{}, err error) {
 	cmd := commands[name]
 	if cmd == nil {
 		return nil, fmt.Errorf(`command.Run: Unknown command: "%s"`, name)
@@ -49,7 +41,7 @@ func Run(name string, params map[string]interface{}) (result map[string]interfac
 		return nil, err
 	}
 
-	conn := redisPool.Get()
+	conn := backend.Redis()
 	defer conn.Close()
 
 	requestBody, err := json.Marshal(request)
@@ -74,15 +66,12 @@ func Run(name string, params map[string]interface{}) (result map[string]interfac
 	return
 }
 
-func respond(requestID string, response *Response) (err error) {
+func respond(conn env.Redis, requestID string, response *Response) (err error) {
 	responseBody, err := json.Marshal(response)
 	if err != nil {
 		return err
 	}
 	queue := replyQueue(requestID)
-
-	conn := redisPool.Get()
-	defer conn.Close()
 
 	// TODO: pipeline LPUSH + EXPIRE
 	_, err = conn.Do("LPUSH", queue, responseBody)
@@ -93,23 +82,25 @@ func respond(requestID string, response *Response) (err error) {
 	return
 }
 
-func respondSuccess(requestID string, result interface{}) error {
-	return respond(requestID, &Response{
+func respondSuccess(conn env.Redis, requestID string, result interface{}) error {
+	return respond(conn, requestID, &Response{
 		Status: "success",
 		Result: result,
 	})
 }
 
-func respondError(requestID string, result interface{}) error {
-	return respond(requestID, &Response{
+func respondError(conn env.Redis, requestID string, result interface{}) error {
+	return respond(conn, requestID, &Response{
 		Status: "error",
 		Result: result,
 	})
 }
 
-func Listen(queue string) {
-	conn := redisPool.Get()
+func Listen(backend env.Backend, queue string) {
+	conn := backend.Redis()
 	defer conn.Close()
+
+	log.Println("Started listening on queue:", queue)
 
 	for {
 		values, err := redis.Values(conn.Do("BRPOP", queue, 0))
@@ -134,22 +125,21 @@ func Listen(queue string) {
 
 		name := request.Name
 		if name == "" {
-			respondError(id, "Received a command without 'name'")
+			respondError(conn, id, "Received a command without 'name'")
 			continue
 		}
 
 		cmd := commands[name]
 		if cmd == nil {
-			respondError(id, "Unknown command")
+			respondError(conn, id, "Unknown command")
 			continue
 		}
 
-		log.Println("Processing command:", cmd.Name)
-		result, err := cmd.handler(request.Params)
+		result, err := cmd.handler(backend, request.Params)
 		if err != nil {
-			respondError(id, err.Error())
+			respondError(conn, id, err.Error())
 		} else {
-			respondSuccess(id, result)
+			respondSuccess(conn, id, result)
 		}
 	}
 }

@@ -16,13 +16,13 @@ func main() {
 		log.Fatal("Failed to load configuration", err)
 	}
 
-	err = backend.Init()
+	backend, err := backend.Init()
 	if err != nil {
 		log.Fatal("Failed to initialize backend", err)
 	}
 
-	reply, err := cmd.Run("RemoveVM", map[string]interface{}{
-		"id": "bbe08913-c1ff-44a6-b0ba-423f23725135",
+	reply, err := backend.Run("RemoveVM", &cmd.IDParams{
+		ID: "6bf2ca64-f2a0-4777-9c8f-731f9fe53a64",
 	})
 
 	if err != nil {

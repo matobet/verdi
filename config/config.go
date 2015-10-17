@@ -11,7 +11,7 @@ import (
 type Config struct {
 	HostID         string `json:"host_id"`
 	RedisServer    string `json:"redis_server"`
-	CommandTimeout int    `json: command_timeout"`
+	CommandTimeout int    `json:"command_timeout"`
 }
 
 var Conf = Config{
