@@ -30,5 +30,6 @@ func Load() error {
 		}
 		return ioutil.WriteFile("./config.json", configFile, 0660)
 	}
+
 	return json.Unmarshal(configFile, &Conf)
 }

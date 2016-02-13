@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"log"
 
+	"reflect"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/matobet/verdi/config"
 	"github.com/matobet/verdi/env"
+	"github.com/mitchellh/mapstructure"
 	"github.com/satori/go.uuid"
 )
 
@@ -135,11 +138,45 @@ func Listen(backend env.Backend, queue string) {
 			continue
 		}
 
-		result, err := cmd.handler(backend, request.Params)
+		result, err := invokeCommandHandler(backend, cmd.handler, request.Params)
 		if err != nil {
 			respondError(conn, id, err.Error())
 		} else {
 			respondSuccess(conn, id, result)
 		}
 	}
+}
+
+type Validator interface {
+	Validate() error
+}
+
+func invokeCommandHandler(backend env.Backend, handler interface{}, params map[string]interface{}) (result interface{}, err error) {
+	handlerType := reflect.TypeOf(handler)
+	if handlerType.Kind() != reflect.Func {
+		panic("cmd: command handler must be a function")
+	}
+	if handlerType.NumIn() != 2 {
+		panic("cmd: command handler must take exactly 2 arguments: env.Backend and params")
+	}
+	paramPtrType := handlerType.In(1)
+	if paramPtrType.Kind() != reflect.Ptr {
+		panic("cmd: command handler must take as 2nd argument a pointer to parameter struct")
+	}
+	cmdParams := reflect.New(paramPtrType.Elem())
+	cmdParamsVal := cmdParams.Interface()
+	err = mapstructure.Decode(params, cmdParamsVal)
+	if err != nil {
+		return
+	}
+	// if params support validation
+	if paramValidator, ok := cmdParamsVal.(Validator); ok {
+		if err = paramValidator.Validate(); err != nil {
+			return
+		}
+	}
+	results := reflect.ValueOf(handler).Call([]reflect.Value{reflect.ValueOf(backend), cmdParams})
+	result = results[0].Interface()
+	err, _ = results[1].Interface().(error)
+	return
 }

@@ -37,6 +37,10 @@ func (c *Conn) Delete(data interface{}) {
 	}
 }
 
+func (conn *Conn) Exists(key string) (bool, error) {
+	return redis.Bool(conn.Do("EXISTS", key))
+}
+
 func (conn *Conn) GetString(key string) (string, error) {
 	return redis.String(conn.Do("GET", key))
 }

@@ -1,8 +1,6 @@
 package backend
 
 import (
-	"fmt"
-
 	"github.com/matobet/verdi/backend/cmd"
 	"github.com/matobet/verdi/backend/redis"
 	"github.com/matobet/verdi/backend/scheduler"
@@ -21,14 +19,14 @@ type backend struct {
 
 func Init() (env.Backend, error) {
 
-	virt, err := virt.NewConn()
-	if err != nil {
-		return nil, fmt.Errorf("backend: Error connecting to libvirt: '%s'", err)
-	}
+	//	virt, err := virt.NewConn()
+	//	if err != nil {
+	//		return nil, fmt.Errorf("backend: Error connecting to libvirt: '%s'", err)
+	//	}
 
 	b := &backend{
 		redisPool: redis.NewPool(),
-		virt:      virt,
+		virt:      nil, //virt,
 	}
 
 	go cmd.Listen(b, cmd.GlobalQueue)

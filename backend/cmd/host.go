@@ -7,7 +7,6 @@ import (
 	"github.com/matobet/verdi/config"
 	"github.com/matobet/verdi/env"
 	"github.com/matobet/verdi/model"
-	maps "github.com/mitchellh/mapstructure"
 )
 
 func pingHost(_backend env.Backend, _params map[string]interface{}) (result interface{}, err error) {
@@ -21,55 +20,41 @@ type ClusterHostParams struct {
 
 var ErrMissingClusterID = errors.New("'cluster_id' must be specified")
 
-func (params *ClusterHostParams) validate() error {
+func (params *ClusterHostParams) Validate() error {
 	if params.ClusterID == "" {
 		return ErrMissingClusterID
 	}
 	return nil
 }
 
-func addHostToCluster(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
-	var p ClusterHostParams
-	maps.Decode(params, &p)
-
-	if err = p.validate(); err != nil {
-		return nil, err
-	}
-
+func addHostToCluster(backend env.Backend, params ClusterHostParams) (result interface{}, err error) {
 	conn := backend.Redis()
 	defer conn.Close()
 
 	hostID := config.Conf.HostID
 
 	conn.Send("MULTI")
-	conn.Send("SADD", "Cluster:"+p.ClusterID, hostID)
-	conn.Send("SADD", "Host:"+hostID+":clusters", p.ClusterID)
+	conn.Send("SADD", "Cluster:"+params.ClusterID, hostID)
+	conn.Send("SADD", "Host:"+hostID+":clusters", params.ClusterID)
 	_, err = conn.Do("EXEC")
 
-	go scheduler.Listen(backend, p.ClusterID)
+	go scheduler.Listen(backend, params.ClusterID)
 
 	return "Added", err
 }
 
-func removeHostFromCluster(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
-	var p ClusterHostParams
-	maps.Decode(params, &p)
-
-	if err = p.validate(); err != nil {
-		return nil, err
-	}
-
+func removeHostFromCluster(backend env.Backend, params ClusterHostParams) (result interface{}, err error) {
 	conn := backend.Redis()
 	defer conn.Close()
 
 	hostID := config.Conf.HostID
 
 	conn.Send("MULTI")
-	conn.Send("SREM", "Cluster:"+p.ClusterID, hostID)
-	conn.Send("SREM", "Host:"+hostID+":clusters", p.ClusterID)
+	conn.Send("SREM", "Cluster:"+params.ClusterID, hostID)
+	conn.Send("SREM", "Host:"+hostID+":clusters", params.ClusterID)
 	_, err = conn.Do("EXEC")
 
-	scheduler.StopListen(backend, p.ClusterID)
+	scheduler.StopListen(backend, params.ClusterID)
 
 	return "Removed", err
 }

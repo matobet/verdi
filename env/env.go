@@ -9,6 +9,7 @@ type RedisPool interface {
 type Redis interface {
 	redis.Conn
 
+	Exists(key string) (bool, error)
 	GetString(key string) (string, error)
 	HGetString(key, field string) (string, error)
 
