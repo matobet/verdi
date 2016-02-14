@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/garyburd/redigo/redis"
 	"github.com/matobet/verdi/env"
 	"github.com/matobet/verdi/model"
 )
@@ -68,7 +67,6 @@ func updateVM(backend env.Backend, params *UpdateVmParams) (result interface{}, 
 		Name: params.Name,
 	}
 
-	// FIXME: needs generic lua script for proper update of indexes
 	tx := conn.Tx().Begin()
 	tx.Put(vm)
 	err = tx.Commit()
@@ -84,20 +82,20 @@ func stopVM(backend env.Backend, params map[string]interface{}) (result interfac
 	return nil, errors.New("Not implemented")
 }
 
-func removeVM(backend env.Backend, params IDParams) (result interface{}, err error) {
+func removeVM(backend env.Backend, params *IDParams) (result interface{}, err error) {
 	conn := backend.Redis()
 	defer conn.Close()
 
-	name, err := conn.HGetString("VM:"+params.ID.String(), "name")
-	if err == redis.ErrNil {
-		return nil, fmt.Errorf("VM with ID '%s' does not exist", params.ID)
-	}
+	exists, err := conn.Exists("VM:" + params.ID.String())
 	if err != nil {
 		return
 	}
+	if !exists {
+		return nil, fmt.Errorf("VM with ID '%s' does not exist", params.ID)
+	}
 
 	tx := conn.Tx().Begin()
-	tx.Delete(&model.VM{ID: params.ID, Name: name})
+	tx.Delete(&model.VM{ID: params.ID})
 	err = tx.Commit()
 
 	return "Removed", err

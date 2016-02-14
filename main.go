@@ -20,9 +20,8 @@ func main() {
 		log.Fatal("Failed to initialize backend: ", err)
 	}
 
-	reply, err := backend.Run("UpdateVM", &cmd.UpdateVmParams{
-		ID:   "09950252-456e-49fd-9c6d-993ea961bf08",
-		Name: "xxxx",
+	reply, err := backend.Run("RemoveVM", &cmd.IDParams{
+		ID: "4392ce9e-5a9b-442e-9037-91764e14b129",
 	})
 
 	if err != nil {

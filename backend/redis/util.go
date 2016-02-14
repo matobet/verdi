@@ -17,16 +17,6 @@ type redisIndexer interface {
 	RedisIndexes() map[string]string
 }
 
-func redisKey(data interface{}) string {
-	key := redisID(data)
-	return redisKeyWithID(data, key)
-}
-
-func redisKeyWithID(data interface{}, id string) string {
-	redisType := redisType(data)
-	return redisKeyWithTypeAndID(redisType, id)
-}
-
 func redisKeyWithTypeAndID(redisType, id string) string {
 	return fmt.Sprintf("%s:%s", redisType, id)
 }
@@ -45,8 +35,4 @@ func redisID(data interface{}) string {
 	}
 
 	return reflect.ValueOf(data).Elem().FieldByName("ID").String()
-}
-
-func redisIndexByTypeFieldAndValue(redisType, field, value string) string {
-	return fmt.Sprintf("q:%s:%s:%s", redisType, field, value)
 }
