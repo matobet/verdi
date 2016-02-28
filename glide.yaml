@@ -1,0 +1,10 @@
+package: github.com/matobet/verdi
+import:
+- package: github.com/alexzorin/libvirt-go
+  version: ^2.12.0
+- package: github.com/fatih/structs
+- package: github.com/garyburd/redigo
+  subpackages:
+  - redis
+- package: github.com/mitchellh/mapstructure
+- package: github.com/satori/go.uuid

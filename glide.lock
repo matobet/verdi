@@ -1,0 +1,17 @@
+hash: a58dd6003d7fa365acf18211a5d630a1e7ed48b0fa9de1059eb81e6c6477bd26
+updated: 2016-02-28T16:44:46.231346079+01:00
+imports:
+- name: github.com/alexzorin/libvirt-go
+  version: 66d8e5e3d8594066da97a9502693a47ab2a35469
+- name: github.com/fatih/structs
+  version: 12ff68a6f48a1c8bd118316171545683337655df
+- name: github.com/garyburd/redigo
+  version: 55d64223b60ff7c6a7f1c391f611038a88a86b01
+  subpackages:
+  - redis
+  - internal
+- name: github.com/mitchellh/mapstructure
+  version: d2dd0262208475919e1a362f675cfc0e7c10e905
+- name: github.com/satori/go.uuid
+  version: e673fdd4dea8a7334adbbe7f57b7e4b00bdc5502
+devImports: []
