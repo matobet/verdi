@@ -1,4 +1,7 @@
 .idea
 config.json
+frontend/bindata.go
+frontend/dist
+node_modules
 verdi
 vendor/

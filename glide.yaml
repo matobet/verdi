@@ -16,3 +16,4 @@ import:
   subpackages:
   - middleware
 - package: github.com/shirou/gopsutil
+- package: github.com/elazarl/go-bindata-assetfs

@@ -1,10 +1,12 @@
-hash: e8eea8111abf485185e8d2c0d4235b6abf1a280f43c16bacb88ef6c9b790f614
-updated: 2016-06-25T16:20:59.924020004+02:00
+hash: 09613569cb4c7b58fbd93328e1b871b121ff7a00743e7aa36bee0db51f2dcaa5
+updated: 2016-06-26T00:54:06.633138678+02:00
 imports:
 - name: github.com/alexzorin/libvirt-go
   version: 66d8e5e3d8594066da97a9502693a47ab2a35469
 - name: github.com/dgrijalva/jwt-go
   version: f0777076321ab64f6efc15a82d9d23b98539b943
+- name: github.com/elazarl/go-bindata-assetfs
+  version: 57eb5e1fc594ad4b0b1dbea7b286d299e0cb43c2
 - name: github.com/fatih/structs
   version: bfcf7eedca5eca84631f95fe4b46d968e0a03500
 - name: github.com/garyburd/redigo
@@ -12,10 +14,6 @@ imports:
   subpackages:
   - redis
   - internal
-- name: github.com/gin-gonic/contrib
-  version: 0ec5111a0a464abbc4989880fd63788e01aae419
-- name: github.com/gin-gonic/gin
-  version: f931d1ea80ae95a6fc739213cdd9399bd2967fb6
 - name: github.com/labstack/echo
   version: 08f714750872c45b6f3893a9803dc52822971ae3
   subpackages:
@@ -39,9 +37,6 @@ imports:
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/shirou/gopsutil
   version: 2728d81cdef579d6ed88d2fd5c71e85aa83eaba8
-  subpackages:
-  - mem
-  - internal/common
 - name: github.com/valyala/fasttemplate
   version: 3b874956e03f1636d171bda64b130f9135f42cff
 - name: golang.org/x/net

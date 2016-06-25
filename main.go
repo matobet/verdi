@@ -2,11 +2,14 @@ package main
 
 import (
 	"log"
+	"net/http"
 
+	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
 	"github.com/matobet/verdi/config"
+	"github.com/matobet/verdi/frontend"
 )
 
 func main() {
@@ -43,16 +46,21 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${time_rfc3339}: ${status} ${response_time} ${method} ${uri} - ${tx_bytes} bytes\n",
+		Format: "${time_rfc3339}: ${status} ${latency_human} ${method} ${uri} - ${tx_bytes} bytes\n",
 	}))
 	e.Use(middleware.Recover())
-	// e.Static("/", "frontend/static")
-	e.Use(middleware.Static("frontend/static"))
 	api := e.Group("/api")
 	{
 		api.GET("/echo", func(c echo.Context) error {
 			return c.JSON(200, map[string]string{"hello": "world"})
 		})
 	}
+	fileServer := http.FileServer(&assetfs.AssetFS{
+		Asset:     frontend.Asset,
+		AssetDir:  frontend.AssetDir,
+		AssetInfo: frontend.AssetInfo,
+		Prefix:    "/",
+	})
+	e.GET("/*", standard.WrapHandler(fileServer))
 	e.Run(standard.New(config.Conf.HTTPPort))
 }
