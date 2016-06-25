@@ -37,10 +37,10 @@ func Init() (env.Backend, error) {
 	return b, nil
 }
 
-func (back *backend) Redis() env.Redis {
-	return back.redisPool.Redis()
+func (b *backend) Redis() env.Redis {
+	return b.redisPool.Redis()
 }
 
-func (back *backend) Run(command string, params interface{}) (map[string]interface{}, error) {
-	return cmd.Run(back, command, structs.Map(params))
+func (b *backend) Run(command string, params interface{}) (map[string]interface{}, error) {
+	return cmd.Run(b, command, structs.Map(params))
 }

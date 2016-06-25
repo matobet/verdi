@@ -4,8 +4,6 @@ type Class int8
 
 const (
 	Global Class = iota
-	DataCenter
-	Cluster
 	Host
 	VM
 )
