@@ -3,9 +3,10 @@ ON            = $(BIN)/on
 GO_BINDATA    = $(BIN)/go-bindata
 DIST          = frontend/dist
 BINDATA       = frontend/bindata.go
-BINDATA_FLAGS = -pkg frontend -prefix $(DIST)
+SCRIPTS_DIR   = backend/redis/scripts
+REDIS_SCRIPTS = backend/redis/bindata.go
 
-all: $(BINDATA)
+all: $(BINDATA) $(REDIS_SCRIPTS)
 	@go build
 
 $(ON):
@@ -16,7 +17,10 @@ $(GO_BINDATA):
 
 $(BINDATA):
 	@npm run build
-	$(GO_BINDATA) -o=$@ $(BINDATA_FLAGS) $(DIST)/...
+	$(GO_BINDATA) -o=$@ -pkg frontend -prefix $(DIST) $(DIST)/...
+
+$(REDIS_SCRIPTS): $(wildcard $(SCRIPTS_DIR)/*.lua)
+	$(GO_BINDATA) -o=$@ -pkg redis -prefix $(SCRIPTS_DIR) $(SCRIPTS_DIR)/...
 
 check:
 	go test -v $(shell glide nv)
@@ -25,3 +29,4 @@ clean:
 	-@rm verdi
 	-@rm -rf $(DIST)/*
 	-@rm $(BINDATA)
+	-@rm $(REDIS_SCRIPTS)

@@ -2,13 +2,12 @@ package model
 
 import "github.com/satori/go.uuid"
 
-type GUID string
+type (
+	GUID string
 
-func (id GUID) String() string {
-	return string(id)
-}
-
-type Status int8
+	//go:generate stringer -type=Status
+	Status int8
+)
 
 const (
 	Down Status = iota
@@ -16,9 +15,11 @@ const (
 	Unknown
 )
 
-//go:generate stringer -type=Status
-
 var GlobalClusterID = GUID(uuid.Nil.String())
+
+func (id GUID) String() string {
+	return string(id)
+}
 
 func NewGUID() GUID {
 	return GUID(uuid.NewV4().String())

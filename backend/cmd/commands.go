@@ -10,8 +10,6 @@ const (
 
 var classes = [...]string{
 	"global",
-	"data_center",
-	"cluster",
 	"host",
 	"vm",
 }
@@ -44,7 +42,7 @@ var commands = byName(Commands{
 	},
 	&Command{
 		Name:    "StopVM",
-		Class:   Global,
+		Class:   VM,
 		handler: stopVM,
 	},
 	&Command{

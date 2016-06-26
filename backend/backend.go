@@ -29,6 +29,11 @@ func Init() (env.Backend, error) {
 		virt:      nil, //virt,
 	}
 
+	err := b.Redis().LoadScripts()
+	if err != nil {
+		return nil, err
+	}
+
 	go cmd.Listen(b, cmd.GlobalQueue)
 	go cmd.Listen(b, cmd.QueueByClassAndID(cmd.Host, config.Conf.HostID))
 

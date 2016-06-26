@@ -1,6 +1,6 @@
 .idea
 config.json
-frontend/bindata.go
+**/bindata.go
 frontend/dist
 node_modules
 verdi

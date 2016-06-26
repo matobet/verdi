@@ -4,10 +4,14 @@ import (
 	"log"
 	"net/http"
 
+	"fmt"
+
 	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
+	"github.com/matobet/verdi/backend"
+	"github.com/matobet/verdi/backend/cmd"
 	"github.com/matobet/verdi/config"
 	"github.com/matobet/verdi/frontend"
 )
@@ -29,20 +33,20 @@ func main() {
 		log.Fatal("Failed to load configuration: ", err)
 	}
 
-	// backend, err := backend.Init()
-	// if err != nil {
-	// 	log.Fatal("Failed to initialize backend: ", err)
-	// }
+	backend, err := backend.Init()
+	if err != nil {
+		log.Fatal("Failed to initialize backend: ", err)
+	}
 
-	// reply, err := backend.Run("RemoveVM", &cmd.IDParams{
-	// 	ID: "4392ce9e-5a9b-442e-9037-91764e14b129",
-	// })
+	reply, err := backend.Run("RemoveVM", &cmd.IDParams{
+		ID: "687692de-e133-4f2b-b715-44cfcc1be81e",
+	})
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// fmt.Println(reply)
+	fmt.Println(reply)
 
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
