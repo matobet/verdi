@@ -51,11 +51,11 @@ if (isProd) {
     historyApiFallback: true,
     proxy: {
       '/api/*': 'http://localhost:4000',
-      '/ws': 'ws://localhost:4000'
+      '/ws': 'http://localhost:4000'
     }
   }
   config.entry.unshift(
-    'webpack-dev-server/client?http://localhost:8080',
+    'webpack-dev-server/client?http://localhost:3000',
     'webpack/hot/only-dev-server'
   )
   config.plugins.push(

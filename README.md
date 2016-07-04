@@ -14,6 +14,6 @@ This project was created for the following reasons:
 
 ## TODO
 
-- [ ] Websocket proxy for frontend development
+- [x] Websocket proxy for frontend development
 - [ ] Host Lifecycle
 - [ ] Basic VM operations
