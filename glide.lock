@@ -1,5 +1,5 @@
-hash: 09613569cb4c7b58fbd93328e1b871b121ff7a00743e7aa36bee0db51f2dcaa5
-updated: 2016-06-26T00:54:06.633138678+02:00
+hash: 4d77b1ad2cd21d0cf1f6586cf35daa643f8c85882137ebe2ee73c002f430d198
+updated: 2016-06-26T05:57:10.915555094+02:00
 imports:
 - name: github.com/alexzorin/libvirt-go
   version: 66d8e5e3d8594066da97a9502693a47ab2a35469
@@ -14,8 +14,10 @@ imports:
   subpackages:
   - redis
   - internal
+- name: github.com/gorilla/websocket
+  version: a68708917c6a4f06314ab4e52493cc61359c9d42
 - name: github.com/labstack/echo
-  version: 08f714750872c45b6f3893a9803dc52822971ae3
+  version: 08e08a00eaae3f081530dc25686e2febfe408952
   subpackages:
   - middleware
   - engine/standard
@@ -47,6 +49,10 @@ imports:
   version: 62bee037599929a6e9146f29d10dd5208c43507d
   subpackages:
   - unix
+- name: gopkg.in/igm/sockjs-go.v2
+  version: 05b5e3121f692bea77aeb1160e4e7881017dc093
+  subpackages:
+  - sockjs
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 devImports: []

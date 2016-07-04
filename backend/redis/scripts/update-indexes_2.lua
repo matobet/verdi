@@ -1,4 +1,4 @@
--- update-indexes TYPE ID field [field...]
+-- update-indexes TYPE ID field value [field value...]
 local type = KEYS[1]
 local id = KEYS[2]
 local newIndexValues = {}

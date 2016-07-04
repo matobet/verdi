@@ -17,3 +17,7 @@ import:
   - middleware
 - package: github.com/shirou/gopsutil
 - package: github.com/elazarl/go-bindata-assetfs
+- package: github.com/gorilla/websocket
+- package: gopkg.in/igm/sockjs-go.v2
+  subpackages:
+  - sockjs

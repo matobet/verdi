@@ -15,7 +15,7 @@ $(ON):
 $(GO_BINDATA):
 	go install github.com/jteeuwen/go-bindata/...
 
-$(BINDATA):
+$(BINDATA): $(shell find frontend -regex ".*\.\(js\|jsx\|html\|css\)")
 	@npm run build
 	$(GO_BINDATA) -o=$@ -pkg frontend -prefix $(DIST) $(DIST)/...
 

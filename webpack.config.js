@@ -50,7 +50,8 @@ if (isProd) {
     hot: true,
     historyApiFallback: true,
     proxy: {
-      '/api/*': 'http://localhost:4000'
+      '/api/*': 'http://localhost:4000',
+      '/ws': 'ws://localhost:4000'
     }
   }
   config.entry.unshift(

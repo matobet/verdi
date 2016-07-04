@@ -1,8 +1,6 @@
 package redis
 
 import (
-	"fmt"
-
 	"github.com/garyburd/redigo/redis"
 	"github.com/matobet/verdi/env"
 )
@@ -12,6 +10,17 @@ type Conn struct {
 }
 
 var _ env.Redis = (*Conn)(nil)
+
+func (c *Conn) Get(data interface{}) error {
+	id := redisID(data)
+	redisType := redisType(data)
+	key := redisKeyWithTypeAndID(redisType, id)
+	values, err := redis.Values(c.Do("HGETALL", key))
+	if err != nil {
+		return err
+	}
+	return redis.ScanStruct(values, data)
+}
 
 func (c *Conn) Put(data interface{}) {
 	id := redisID(data)
@@ -49,7 +58,6 @@ func (conn *Conn) Tx() env.RedisTx {
 
 func (c *Conn) updateIndexes(redisType, id string, data interface{}) {
 	if indexer, ok := data.(redisIndexer); ok {
-		fmt.Println(indexer.RedisIndexes())
 		c.SendScript("update-indexes", redis.Args{redisType, id}.AddFlat(indexer.RedisIndexes())...)
 	}
 }

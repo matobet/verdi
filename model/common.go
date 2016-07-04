@@ -5,7 +5,6 @@ import "github.com/satori/go.uuid"
 type (
 	GUID string
 
-	//go:generate stringer -type=Status
 	Status int8
 )
 
@@ -14,6 +13,12 @@ const (
 	Up
 	Unknown
 )
+
+var Statuses = [...]string{
+	"down",
+	"up",
+	"unknown",
+}
 
 var GlobalClusterID = GUID(uuid.Nil.String())
 

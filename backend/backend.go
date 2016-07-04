@@ -9,27 +9,27 @@ import (
 	"github.com/matobet/verdi/env"
 	"github.com/matobet/verdi/model"
 
-	"github.com/fatih/structs"
+	"fmt"
 )
 
 type backend struct {
 	redisPool *redis.Pool
-	virt      virt.Conn
+	virt      *virt.Conn
 }
 
 func Init() (env.Backend, error) {
 
-	//	virt, err := virt.NewConn()
-	//	if err != nil {
-	//		return nil, fmt.Errorf("backend: Error connecting to libvirt: '%s'", err)
-	//	}
+	virt, err := virt.NewConn()
+	if err != nil {
+		return nil, fmt.Errorf("backend: Error connecting to libvirt: '%s'", err)
+	}
 
 	b := &backend{
 		redisPool: redis.NewPool(),
-		virt:      nil, //virt,
+		virt:      virt,
 	}
 
-	err := b.Redis().LoadScripts()
+	err = b.Redis().LoadScripts()
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +46,10 @@ func (b *backend) Redis() env.Redis {
 	return b.redisPool.Redis()
 }
 
-func (b *backend) Run(command string, params interface{}) (map[string]interface{}, error) {
-	return cmd.Run(b, command, structs.Map(params))
+func (b *backend) Virt() env.Virt {
+	return b.virt
+}
+
+func (b *backend) Run(command string, params map[string]interface{}) (map[string]interface{}, error) {
+	return cmd.Run(b, command, params)
 }

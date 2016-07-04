@@ -11,3 +11,9 @@ This project was created for the following reasons:
 * Creating a more distributed IaaS management application
 * Exploring the idea of using Redis for *everything* (as main data-store, distributed RPC, pub/sub, ...)
 * Learning the Go language ;-)
+
+## TODO
+
+- [ ] Websocket proxy for frontend development
+- [ ] Host Lifecycle
+- [ ] Basic VM operations

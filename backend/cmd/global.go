@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/matobet/verdi/env"
 	"github.com/matobet/verdi/model"
@@ -14,7 +15,20 @@ type IDParams struct {
 
 type AddVmParams struct {
 	Name      string
-	ClusterID model.GUID
+	MemSizeMB uint64
+}
+
+var ErrBlankName = errors.New("Name cannot be blank")
+var ErrNegativeMemory = errors.New("Memory size must be positive")
+
+func (p *AddVmParams) Validate() error {
+	if strings.TrimSpace(p.Name) == "" {
+		return ErrBlankName
+	}
+	if p.MemSizeMB <= 0 {
+		return ErrNegativeMemory
+	}
+	return nil
 }
 
 func addVM(backend env.Backend, params *AddVmParams) (result interface{}, err error) {
@@ -36,7 +50,7 @@ func addVM(backend env.Backend, params *AddVmParams) (result interface{}, err er
 	vm := &model.VM{
 		ID:        model.NewGUID(),
 		Name:      params.Name,
-		ClusterID: params.ClusterID,
+		MemSizeMB: params.MemSizeMB,
 	}
 
 	tx := redis.Tx().Begin()
@@ -74,8 +88,25 @@ func updateVM(backend env.Backend, params *UpdateVmParams) (result interface{}, 
 	return "Updated", err
 }
 
-func runVM(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {
-	return nil, errors.New("Not implemented")
+func runVM(backend env.Backend, params *IDParams) (result interface{}, err error) {
+	conn := backend.Redis()
+	defer conn.Close()
+
+	ok, err := conn.Exists("VM:" + params.ID.String())
+	if err != nil {
+		return
+	}
+	if !ok {
+		return nil, fmt.Errorf("VM with ID '%s' does not exist", params.ID)
+	}
+
+	vm := &model.VM{ID: params.ID}
+	err = conn.Get(vm)
+	if err != nil {
+		return
+	}
+	err = backend.Virt().StartVM(vm)
+	return "Started", err
 }
 
 func stopVM(backend env.Backend, params map[string]interface{}) (result interface{}, err error) {

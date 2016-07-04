@@ -4,52 +4,61 @@ import (
 	"fmt"
 
 	"github.com/alexzorin/libvirt-go"
+	"github.com/matobet/verdi/env"
+	"github.com/matobet/verdi/model"
 )
 
-type Conn interface {
-	StartVM() error
-}
+var _ env.Virt = (*Conn)(nil)
 
-type conn struct {
+type Conn struct {
 	libvirt.VirConnection
 }
 
-func NewConn() (Conn, error) {
+func NewConn() (*Conn, error) {
 	c, err := libvirt.NewVirConnection("qemu:///system")
 	if err != nil {
 		return nil, err
 	}
-	return &conn{VirConnection: c}, nil
+	return &Conn{VirConnection: c}, nil
 }
 
-func (c *conn) StartVM() error {
-	vm, err := c.DomainCreateXML(`
-			<domain type='qemu'>
-				<name>go-vm</name>
-				<memory unit='MiB'>512</memory>
-				<os>
-					<type>hvm</type>
-					<boot dev='network'/>
-				</os>
-				<devices>
-					<graphics type='spice' autoport='yes'/>
-					<interface type='direct'>
-				        <source dev='em1' mode='bridge'/>
-				    </interface>
-				</devices>
-			</domain>
-			`, 0)
+func (c *Conn) StartVM(vm *model.VM) error {
+	xml := fmt.Sprintf(`
+		<domain type='qemu'>
+			<name>%s</name>
+			<memory unit='MiB'>%d</memory>
+			<os>
+				<type>hvm</type>
+				<boot dev='network'/>
+			</os>
+			<devices>
+				<graphics type='spice' autoport='yes'/>
+				<interface type='direct'>
+					<source dev='em1' mode='bridge'/>
+				</interface>
+			</devices>
+		</domain>
+		`, vm.Name, vm.MemSizeMB)
+	libvirtVm, err := c.DomainCreateXML(xml, 0)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(vm.GetXMLDesc(0))
+	fmt.Println(libvirtVm.GetXMLDesc(0))
 
 	return nil
 }
 
-func (c *conn) ListAll() error {
+func (c *Conn) StopVM(vm *model.VM) error {
+	libvirtVm, err := c.LookupDomainByName(vm.Name)
+	if err != nil {
+		return err
+	}
+	return libvirtVm.Destroy()
+}
+
+func (c *Conn) ListAll() error {
 	vms, err := c.ListAllDomains(0)
 	if err != nil {
 		return err

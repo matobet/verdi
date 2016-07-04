@@ -34,6 +34,7 @@ func TestCommandHandlerInvokesValidate(t *testing.T) {
 type MockBackend struct {
 	env.RedisPool
 	env.Commander
+	env.Virter
 }
 
 func TestCommandHandlerInvokesHandlerWithParsedParams(t *testing.T) {
@@ -45,7 +46,7 @@ func TestCommandHandlerInvokesHandlerWithParsedParams(t *testing.T) {
 		}
 		return "ok", nil
 	}
-	result, err := invokeCommandHandler(MockBackend{nil, nil}, handler, map[string]interface{}{
+	result, err := invokeCommandHandler(MockBackend{}, handler, map[string]interface{}{
 		"Value": 42,
 	})
 
