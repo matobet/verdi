@@ -1,6 +1,10 @@
 package backend
 
 import (
+	"fmt"
+	"log"
+	"time"
+
 	"github.com/matobet/verdi/backend/cmd"
 	"github.com/matobet/verdi/backend/redis"
 	"github.com/matobet/verdi/backend/scheduler"
@@ -8,8 +12,7 @@ import (
 	"github.com/matobet/verdi/config"
 	"github.com/matobet/verdi/env"
 	"github.com/matobet/verdi/model"
-
-	"fmt"
+	"github.com/shirou/gopsutil/mem"
 )
 
 type backend struct {
@@ -35,9 +38,11 @@ func Init() (env.Backend, error) {
 	}
 
 	go cmd.Listen(b, cmd.GlobalQueue)
-	go cmd.Listen(b, cmd.QueueByClassAndID(cmd.Host, config.Conf.HostID))
+	go cmd.Listen(b, cmd.QueueByClassAndID(cmd.Host, config.Conf.HostID.String()))
 
 	go scheduler.Listen(b, model.GlobalClusterID)
+
+	go b.monitor()
 
 	return b, nil
 }
@@ -52,4 +57,23 @@ func (b *backend) Virt() env.Virt {
 
 func (b *backend) Run(command string, params map[string]interface{}) (map[string]interface{}, error) {
 	return cmd.Run(b, command, params)
+}
+
+func (b *backend) monitor() {
+	redis := b.Redis()
+	hostStats := model.HostStats{ID: config.Conf.HostID}
+	for {
+		time.Sleep(1 * time.Second)
+		memStats, err := mem.VirtualMemory()
+		if err != nil {
+			log.Printf("Error gathering memory stats: %s", err)
+			continue
+		}
+		log.Printf("%+v", memStats)
+		hostStats.TotalMemSizeMB = memStats.Total
+		hostStats.MemUsedMB = memStats.Used
+		tx := redis.Tx().Begin()
+		tx.Put(hostStats)
+		tx.Commit()
+	}
 }

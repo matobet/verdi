@@ -5,20 +5,20 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/satori/go.uuid"
+	"github.com/matobet/verdi/model"
 )
 
 type Config struct {
-	HostID         string `json:"host_id"`
-	RedisServer    string `json:"redis_server"`
-	CommandTimeout int    `json:"command_timeout"`
+	HostID         model.GUID `json:"host_id"`
+	RedisServer    string     `json:"redis_server"`
+	CommandTimeout int        `json:"command_timeout"`
 
 	HTTPPort string `json:"http_port"`
 }
 
 var Conf = Config{
 	RedisServer:    ":6379",
-	HostID:         uuid.NewV4().String(),
+	HostID:         model.NewGUID(),
 	CommandTimeout: 5,
 	HTTPPort:       ":4000",
 }

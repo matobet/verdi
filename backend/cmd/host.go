@@ -31,7 +31,7 @@ func addHostToCluster(backend env.Backend, params ClusterHostParams) (result int
 	conn := backend.Redis()
 	defer conn.Close()
 
-	hostID := config.Conf.HostID
+	hostID := config.Conf.HostID.String()
 
 	conn.Send("MULTI")
 	conn.Send("SADD", "Cluster:"+params.ClusterID, hostID)
@@ -47,8 +47,7 @@ func removeHostFromCluster(backend env.Backend, params ClusterHostParams) (resul
 	conn := backend.Redis()
 	defer conn.Close()
 
-	hostID := config.Conf.HostID
-
+	hostID := config.Conf.HostID.String()
 	conn.Send("MULTI")
 	conn.Send("SREM", "Cluster:"+params.ClusterID, hostID)
 	conn.Send("SREM", "Host:"+hostID+":clusters", params.ClusterID)

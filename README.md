@@ -15,5 +15,6 @@ This project was created for the following reasons:
 ## TODO
 
 - [x] Websocket proxy for frontend development
+- [ ] Migrate to go-redis for Redis Cluster support
 - [ ] Host Lifecycle
 - [ ] Basic VM operations
